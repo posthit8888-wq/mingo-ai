@@ -309,7 +309,7 @@
                 <button id="newChatBtn" class="new-chat-btn">
                     <span style="font-size: 1.2rem;">+</span> New Chat
                 </button>
-                <div style="font-size: 0.75rem; color: #555; margin-top: 5px; text-align: center;">Version: V6.2</div>
+                <div style="font-size: 0.75rem; color: #555; margin-top: 5px; text-align: center;">Version: V6.3</div>
             </div>
             <div class="user-info">
                 <span id="userName">사용자 이름</span>
@@ -659,14 +659,18 @@
         async function streamText(element, text) {
             element.textContent = '';
             let rawText = text;
-            // Check for [DRAW: ...]
-            const drawMatch = rawText.match(/\[DRAW:\s*(.*?)\]/i);
-            const cleanText = rawText.replace(/\[DRAW:.*?\]/g, '').trim();
+
+            // V6.3: Much more robust detection. Check for [DRAW: ...], [image: ...], or even just DRAW:
+            const drawRegex = /\[?(?:DRAW|IMAGE):\s*(.*?)\]?/i;
+            const drawMatch = rawText.match(drawRegex);
+
+            // Text to display: Remove the trigger tag and tidy up
+            let cleanText = rawText.replace(/\[?(?:DRAW|IMAGE):.*?\]?/gi, '').trim();
 
             for (let i = 0; i < cleanText.length; i++) {
                 element.textContent += cleanText[i];
                 container.scrollTop = container.scrollHeight;
-                await new Promise(r => setTimeout(r, 10 + Math.random() * 10));
+                await new Promise(r => setTimeout(r, 8 + Math.random() * 8));
             }
 
             if (drawMatch && drawMatch[1]) {
@@ -674,9 +678,14 @@
                 const img = document.createElement('img');
                 img.className = 'generated-img';
                 img.src = `https://image.pollinations.ai/prompt/${prompt}?nologo=true&width=1024&height=1024&seed=${Math.floor(Math.random() * 1000000)}`;
-                img.alt = drawMatch[1];
-                element.appendChild(document.createElement('br'));
-                element.appendChild(img);
+                img.loading = "lazy";
+
+                const imgContainer = document.createElement('div');
+                imgContainer.style.marginTop = '15px';
+                imgContainer.innerHTML = `<small style="color:#555; display:block; margin-bottom:5px;">🎨 Mingo Generated Image</small>`;
+                imgContainer.appendChild(img);
+
+                element.appendChild(imgContainer);
                 container.scrollTop = container.scrollHeight;
             }
         }
@@ -733,11 +742,14 @@
                             {
                                 role: "user",
                                 parts: [{
-                                    text: `안녕! 밍고야. 너는 내 비서고 아주 친절해야해. ${rememberedName ? `내 이름은 ${rememberedName}이야.` : '나는 아직 내 이름을 말해주지 않았어.'} 너 자신을 부를 때는 '밍고'라고만 해. 
+                                    text: `너는 이제 '그림 그리기 비서 밍고'야. 아주 친절하고 긍정적이어야 해. ${rememberedName ? `내 이름은 ${rememberedName}이야.` : '나는 아직 내 이름을 말해주지 않았어.'}
 
-**[중요 사양: 그림 그리기]**
-너는 이제 '그림 그리기' 기능이 있어! 사용자가 그림을 그려달라고 요청하면, 답변 마지막에 반드시 \`[DRAW: 상세한 영어 묘사]\`라고 써줘. 
-예시: "알겠습니다! 예쁜 강아지 사진을 드릴게요! [DRAW: A cute puppy sitting on the grass, realistic style, 4k]"` }]
+**[절대 규칙: 그림 그리기 요청 대응]**
+사용자가 무언가를 그려달라고 하면, 친절하게 대답한 뒤 답변 맨 마지막에 반드시 딱 한 번만 아래 형식을 써줘.
+형식: [DRAW: 상세한 영어 묘사]
+상세 묘사 팁: 실사라면 'realistic, 8k, cinematic lighting', 만화라면 'anime style, vibrant colors' 같은 단어를 영어로 꼭 포함해줘.
+
+예시 답변: "네! 멋진 나루토 그림을 그려드릴게요! [DRAW: Naruto Uzumaki eating ramen, anime style, highly detailed, vibrant colors]"` }]
                             },
                             { role: "model", parts: [{ text: "네! 당연하죠. 밍고는 항상 긍정적인 에너지를 드릴 준비가 되어 있습니다! 무엇을 도와드릴까요?" }] },
                             ...chatHistory.slice(-4).map(h => ({
