@@ -25,12 +25,15 @@ export default async function handler(req, res) {
       body: JSON.stringify({ contents })
     });
 
-    const data = await response.json();
-
     // 4. 결과 반환
-    return res.status(response.status).json(data);
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Gemini API Error:', data);
+      return res.status(response.status).json(data);
+    }
+    return res.status(200).json(data);
   } catch (error) {
     console.error('API Proxy Error:', error);
-    return res.status(500).json({ error: 'Failed to connect to AI engine.' });
+    return res.status(500).json({ error: 'Failed to connect to AI engine.', details: error.message });
   }
 }

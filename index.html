@@ -751,16 +751,22 @@
                     chatHistory.push({ role: 'user', content: currentText });
                     chatHistory.push({ role: 'assistant', content: responseText });
                 } else {
-                    // 구글 API는 에러 정보를 객체로 반환하는 경우가 많습니다.
+                    // 더 강력한 에러 추출 로직
                     let errorMsg = "AI 엔진과의 연결이 원활하지 않습니다.";
-                    if (data.error) {
-                        if (typeof data.error === 'string') {
-                            errorMsg = data.error;
-                        } else if (data.error.message) {
-                            errorMsg = data.error.message;
-                        } else {
-                            errorMsg = JSON.stringify(data.error);
+                    try {
+                        if (data.error) {
+                            if (typeof data.error === 'string') {
+                                errorMsg = data.error;
+                            } else if (data.error.message) {
+                                errorMsg = data.error.message;
+                            } else {
+                                errorMsg = JSON.stringify(data.error, null, 2);
+                            }
+                        } else if (data.message) {
+                            errorMsg = data.message;
                         }
+                    } catch (e) {
+                        errorMsg = "데이터 분석 중 오류가 발생했습니다.";
                     }
                     addMessage(`❌ **연결 오류**\n\n${errorMsg}`, false);
                 }
