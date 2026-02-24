@@ -1,0 +1,843 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mingo AI</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #171717;
+            --bg-sidebar: #0f0f0f;
+            --bg-bubble-user: #2f2f2f;
+            --text-primary: #ececec;
+            --text-secondary: #b4b4b4;
+            --accent-blue: #3d7eff;
+            --input-border: #424242;
+            --max-width: 800px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .new-chat-btn {
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .new-chat-btn:hover {
+            background: #202123;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .history-item:hover {
+            background: #202123;
+            color: var(--text-primary);
+        }
+
+        /* --- Main Area --- */
+        .main-workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+            background: var(--bg-page);
+            z-index: 10;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 120px;
+            /* Space for input */
+        }
+
+        .message-row {
+            width: 100%;
+            padding: 24px 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .message-content {
+            width: 100%;
+            max-width: var(--max-width);
+            display: flex;
+            gap: 20px;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .user-avatar {
+            background: #5436da;
+            color: white;
+        }
+
+        .ai-avatar {
+            background: #10a37f;
+            color: white;
+        }
+
+        .text-body {
+            line-height: 1.6;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        .message-row.user {
+            background: transparent;
+        }
+
+        .message-row.ai {
+            background: #212121;
+        }
+
+        /* --- Footer Input --- */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 24px;
+            background: linear-gradient(0deg, var(--bg-page) 60%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-box {
+            width: 100%;
+            max-width: var(--max-width);
+            background: #2f2f2f;
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .attach-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .attach-btn:hover {
+            color: var(--accent-blue);
+        }
+
+        textarea {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            max-height: 200px;
+            padding: 4px 0;
+        }
+
+        .send-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .loading-dots span {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            margin-right: 2px;
+            animation: blink 1.4s infinite both;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+
+            0%,
+            80%,
+            100% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 1;
+            }
+        }
+
+        /* --- Mobile --- */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: absolute;
+                height: 100%;
+                z-index: 20;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+
+        .generated-img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid #444;
+            display: block;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar" id="sidebar">
+        <div class="new-chat-btn" id="newChatBtn">
+            <span>➕</span> <span>New Chat</span>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- Chat history will appear here -->
+        </div>
+
+        <div class="user-profile" id="userProfile">
+            <img src="" class="profile-img" id="profileImg">
+            <div class="user-info">
+                <span id="userName">사용자 이름</span>
+                <small id="userEmail">user@example.com</small>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-workspace">
+        <header class="chat-header">
+            Mingo AI
+        </header>
+
+        <div class="messages-container" id="messagesContainer">
+            <!-- Initial Message -->
+            <div class="message-row ai">
+                <div class="message-content">
+                    <div class="avatar ai-avatar">M</div>
+                    <div class="text-body" id="welcomeMsg">안녕하세요! 인공지능 **밍고(Mingo)**입니다. 무엇을 도와드릴까요?</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="input-box">
+                <button class="attach-btn" id="attachBtn" title="이미지 업로드">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7M16 5l2 2 4-4M21 11.5v-3.5L16 3M3 16l4.5-4.5L13 17l2-2 4 4" />
+                    </svg>
+                </button>
+                <textarea id="messageInput" placeholder="AI에게 메시지 보내기..." rows="1"></textarea>
+                <input type="file" id="fileInput" accept="image/*" style="display:none">
+                <button class="send-btn" id="sendBtn" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+            <p style="font-size: 0.7rem; color: #777; margin-top: 12px;">Mingo AI | Powered by Gemini | AI can make
+                mistakes.</p>
+        </div>
+    </main>
+
+    <!-- Login Gateway -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <h2>Mingo</h2>
+            <p>특별한 인공지능 공간에 오신 것을 환영합니다.<br>Google 계정으로 로그인을 시작하세요.</p>
+            <div id="googleBtn"></div>
+            <button onclick="startGuestMode()" class="btn-guest">비회원으로 시작하기</button>
+        </div>
+    </div>
+
+    <!-- Age Verification Modal -->
+    <div id="ageModal" class="age-modal">
+        <div class="age-card">
+            <h3>🔞 연령 확인</h3>
+            <p style="margin-top:10px; color:var(--text-secondary);">본 서비스는 만 13세 이상만 이용 가능합니다. 당신은 만 13세 이상입니까?</p>
+            <div class="age-btns">
+                <button onclick="verifyAge(true)" class="btn-primary" style="flex:1;">네, 이상입니다</button>
+                <button onclick="verifyAge(false)"
+                    style="flex:1; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">아니오</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Overlay Removed -->
+
+    /* API Styles Removed */
+    .login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0f0f0f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    }
+
+    .login-card {
+    background: #1a1a1a;
+    padding: 48px;
+    border-radius: 24px;
+    border: 1px solid #333;
+    text-align: center;
+    max-width: 440px;
+    width: 90%;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+    }
+
+    .login-card h2 {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    background: linear-gradient(90deg, #fff, #888);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    }
+
+    .login-card p {
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    line-height: 1.6;
+    }
+
+    /* --- Age Modal --- */
+    .age-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 11000;
+    backdrop-filter: blur(10px);
+    }
+
+    .age-card {
+    background: #1e1e1e;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 380px;
+    }
+
+    .age-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    }
+
+    .btn-guest {
+    margin-top: 20px;
+    background: none;
+    border: 1px solid #444;
+    color: var(--text-secondary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.2s;
+    width: 250px;
+    }
+
+    .btn-guest:hover {
+    color: #fff;
+    border-color: #666;
+    background: #222;
+    }
+
+    /* --- User Profile in Sidebar --- */
+    .user-profile {
+    padding: 16px;
+    border-top: 1px solid #222;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+    }
+
+    .profile-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #333;
+    }
+
+    .user-info span {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    }
+
+    .user-info small {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    }
+    </style>
+
+    <!-- Mingo - ChatGPT Style Implementation -->
+
+    <script>
+        // --- GEMINI REAL-AI CORE (REST API v1) ---
+
+        const container = document.getElementById('messagesContainer');
+        const textarea = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const loginOverlay = document.getElementById('loginOverlay');
+        const ageModal = document.getElementById('ageModal');
+
+        const CLIENT_ID = "1098394971470-3q8kc408bljrmqk9kh9lsdbl26o3u2mn.apps.googleusercontent.com";
+
+        let currentUser = JSON.parse(localStorage.getItem('USER_INFO')) || null;
+        let isGuest = localStorage.getItem('MINGO_IS_GUEST') === 'true';
+        let chatHistory = [];
+        let savedChats = JSON.parse(localStorage.getItem('MINGO_CHATS')) || [];
+        let rememberedName = localStorage.getItem('MINGO_USER_NAME') || "";
+        let selectedFile = null;
+        let selectedFileBase64 = null;
+
+        // --- Google Login Setup ---
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("googleBtn"),
+                { theme: "filled_blue", size: "large", width: 250 }
+            );
+
+            if (currentUser) {
+                showApp();
+            }
+        }
+
+        function startGuestMode() {
+            isGuest = true;
+            localStorage.setItem('MINGO_IS_GUEST', 'true');
+            currentUser = { name: "게스트", picture: "" };
+            showApp();
+        }
+
+        function handleCredentialResponse(response) {
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            currentUser = {
+                name: payload.name,
+                email: payload.email,
+                picture: payload.picture
+            };
+            localStorage.setItem('USER_INFO', JSON.stringify(currentUser));
+            localStorage.setItem('MINGO_IS_GUEST', 'false');
+
+            showApp();
+        }
+
+        function verifyAge(isOver13) {
+            if (isOver13) {
+                ageModal.style.display = 'none';
+                showApp();
+            } else {
+                alert("죄송합니다. 만 13세 미만은 본 서비스를 이용할 수 없습니다.");
+                location.reload();
+            }
+        }
+
+        function checkApiKey() {
+            const storageKey = isGuest ? 'MINGO_KEY_GUEST' : `MINGO_KEY_${currentUser.email}`;
+            API_KEY = localStorage.getItem(storageKey) || "";
+
+            if (!API_KEY) {
+                const titleEl = document.getElementById('apiTitle');
+                const msgEl = document.getElementById('apiMsg');
+
+                if (isGuest) {
+                    titleEl.textContent = "👤 손님 모드";
+                    msgEl.innerHTML = "비회원 이용을 위해 본인의 API 키를 입력해 주세요.<br>대화 기록은 저장되지 않습니다.";
+                } else {
+                    titleEl.textContent = "🧠 AI 두뇌 연결";
+                    msgEl.innerHTML = "로그인 완료! 이제 AI를 작동시키기 위해<br>API 키를 한 번만 등록해 주세요.";
+                }
+                overlay.style.display = 'flex';
+            } else {
+                showApp();
+            }
+        }
+
+        function showApp() {
+            loginOverlay.style.display = 'none';
+            ageModal.style.display = 'none';
+
+            if (!isGuest) {
+                // Sidebar Profile
+                document.getElementById('userProfile').style.display = 'flex';
+                document.getElementById('profileImg').src = currentUser.picture;
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userEmail').textContent = currentUser.email;
+
+                // Greeting
+                const msg = rememberedName ? `안녕하세요 **${rememberedName}**님! 다시 대화를 시작해볼까요?` : "안녕하세요! 인공지능 **밍고(Mingo)**입니다. 무엇을 도와드릴까요?";
+                document.getElementById('welcomeMsg').innerHTML = msg;
+                loadHistory();
+            } else {
+                document.getElementById('userProfile').style.display = 'none';
+                document.getElementById('historyList').innerHTML = '<div style="padding:10px; font-size:0.8rem; color:#555;">손님 모드에서는 히스토리 보관이 제한될 수 있습니다.</div>';
+            }
+        }
+
+        function saveApiKey() {
+            const val = keyInput.value.trim();
+            if (val) {
+                const storageKey = isGuest ? 'MINGO_KEY_GUEST' : `MINGO_KEY_${currentUser.email}`;
+                localStorage.setItem(storageKey, val);
+                API_KEY = val;
+                showApp();
+            }
+        }
+
+        function resetApiKey() {
+            if (confirm("현재 계정의 설정을 초기화하고 완전히 로그아웃하시겠습니까? (이름과 프로필이 삭제됩니다)")) {
+                localStorage.removeItem('USER_INFO');
+                localStorage.removeItem('MINGO_USER_NAME');
+                location.reload();
+            }
+        }
+
+        function changeApiKey() {
+            const storageKey = isGuest ? 'MINGO_KEY_GUEST' : `MINGO_KEY_${currentUser.email}`;
+            localStorage.removeItem(storageKey);
+            API_KEY = "";
+            checkApiKey();
+        }
+
+        function newChat() {
+            chatHistory = [];
+            container.innerHTML = `
+                <div class="message-row ai">
+                    <div class="message-content">
+                        <div class="avatar ai-avatar">M</div>
+                        <div class="text-body">${isGuest ? '안녕하세요! 무엇을 도와드릴까요?' : (rememberedName ? `안녕하세요 **${rememberedName}**님! 다시 대화를 시작해볼까요?` : "안녕하세요! 다시 대화를 시작해볼까요?")}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            savedChats.forEach((chat, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = chat.title;
+                item.onclick = () => alert("이전 대화 불러오기 기능은 준비 중입니다! (제목만 저장됩니다)");
+                list.appendChild(item);
+            });
+        }
+
+        function saveToHistory(firstMessage) {
+            if (isGuest || chatHistory.length > 2) return;
+            const title = firstMessage.length > 20 ? firstMessage.substring(0, 20) + '...' : firstMessage;
+            savedChats.unshift({ title: title, date: new Date().toISOString() });
+            localStorage.setItem('MINGO_CHATS', JSON.stringify(savedChats));
+            loadHistory();
+        }
+
+        function checkAndRememberName(text) {
+            if (rememberedName) return;
+            const nameMatch = text.match(/내\s+이름은\s+([가-힣a-zA-Z0-9]+)/);
+            if (nameMatch && nameMatch[1]) {
+                rememberedName = nameMatch[1];
+                localStorage.setItem('MINGO_USER_NAME', rememberedName);
+                return true;
+            }
+            return false;
+        }
+
+        function addMessage(text, isUser, imageData = null) {
+            const row = document.createElement('div');
+            row.className = `message-row ${isUser ? 'user' : 'ai'}`;
+            let imgHtml = imageData ? `<img src="${imageData}" style="max-width:200px; border-radius:8px; margin-bottom:10px; display:block;">` : "";
+            row.innerHTML = `
+                <div class="message-content">
+                    <div class="avatar ${isUser ? 'user-avatar' : 'ai-avatar'}">${isUser ? 'U' : 'M'}</div>
+                    <div class="text-body">${imgHtml}${text}</div>
+                </div>
+            `;
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+            return row.querySelector('.text-body');
+        }
+
+        async function streamText(element, text) {
+            element.textContent = '';
+            let rawText = text;
+            // Check for [DRAW: ...]
+            const drawMatch = rawText.match(/\[DRAW:\s*(.*?)\]/);
+            const cleanText = rawText.replace(/\[DRAW:.*?\]/g, '').trim();
+
+            for (let i = 0; i < cleanText.length; i++) {
+                element.textContent += cleanText[i];
+                container.scrollTop = container.scrollHeight;
+                await new Promise(r => setTimeout(r, 10 + Math.random() * 10));
+            }
+
+            if (drawMatch && drawMatch[1]) {
+                const prompt = encodeURIComponent(drawMatch[1]);
+                const img = document.createElement('img');
+                img.className = 'generated-img';
+                img.src = `https://image.pollinations.ai/prompt/${prompt}?nologo=true&width=1024&height=1024&seed=${Math.floor(Math.random() * 1000000)}`;
+                img.alt = drawMatch[1];
+                element.appendChild(document.createElement('br'));
+                element.appendChild(img);
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+
+        async function handleSend() {
+            const text = textarea.value.trim();
+            if (!text && !selectedFile) return;
+
+            const currentText = text;
+            const currentFileData = selectedFileBase64;
+            const currentFileType = selectedFile ? selectedFile.type : null;
+
+            textarea.value = '';
+            textarea.style.height = 'auto';
+            sendBtn.disabled = true;
+
+            addMessage(currentText, true, currentFileData);
+            saveToHistory(currentText || "사진 분석 요청");
+            checkAndRememberName(currentText);
+
+            selectedFile = null;
+            selectedFileBase64 = null;
+            document.getElementById('attachBtn').style.color = 'var(--text-secondary)';
+
+            const thinkingRow = document.createElement('div');
+            thinkingRow.className = 'message-row ai';
+            thinkingRow.innerHTML = `
+                <div class="message-content">
+                    <div class="avatar ai-avatar">M</div>
+                    <div class="text-body">
+                        <span id="modelStatus">🤔 생각 중...</span>
+                        <div class="loading-dots"><span></span><span></span><span></span></div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(thinkingRow);
+            container.scrollTop = container.scrollHeight;
+
+            const statusEl = thinkingRow.querySelector('#modelStatus');
+
+            try {
+                statusEl.textContent = `⚡ 밍고 엔진 연결 중...`;
+
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        modelId: "gemini-1.5-flash-latest",
+                        contents: [
+                            {
+                                role: "user",
+                                parts: [{ text: `안녕! 밍고야. 너는 내 비서고 아주 친절해야해. ${rememberedName ? `내 이름은 ${rememberedName}이야.` : '나는 아직 내 이름을 말해주지 않았어.'} 너 자신을 부를 때는 '밍고'라고만 해. 너는 이제 '그림 그리기' 기능이 있어! 사용자가 그림을 그려달라고 요청하면, 답변 마지막에 반드시 \`[DRAW: 상세한 영어 묘사]\`라고 써줘.` }]
+                            },
+                            { role: "model", parts: [{ text: "네! 당연하죠. 밍고는 항상 긍정적인 에너지를 드릴 준비가 되어 있습니다! 무엇을 도와드릴까요?" }] },
+                            ...chatHistory.slice(-4).map(h => ({
+                                role: h.role === "user" ? "user" : "model",
+                                parts: [{ text: h.content }]
+                            })),
+                            {
+                                role: "user",
+                                parts: [
+                                    ...(currentFileData ? [{ inline_data: { mime_type: currentFileType, data: currentFileData.split(',')[1] } }] : []),
+                                    { text: currentText || "이 이미지를 분석해줘." }
+                                ]
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                thinkingRow.remove();
+
+                if (response.ok && data.candidates && data.candidates[0].content) {
+                    const responseText = data.candidates[0].content.parts[0].text;
+                    const aiTextElement = addMessage('', false);
+                    await streamText(aiTextElement, responseText);
+                    chatHistory.push({ role: 'user', content: currentText });
+                    chatHistory.push({ role: 'assistant', content: responseText });
+                } else {
+                    const errorMsg = data.error || "AI 엔진과의 연결이 원활하지 않습니다.";
+                    addMessage(`❌ **연결 오류**\n\n${errorMsg}`, false);
+                }
+            } catch (error) {
+                console.error(error);
+                if (thinkingRow.parentNode) thinkingRow.remove();
+                addMessage("❌ **네트워크 오류**가 발생했습니다. 잠시 후 다시 시도해 주세요.", false);
+            }
+            sendBtn.disabled = false;
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+
+        document.getElementById('newChatBtn').addEventListener('click', newChat);
+
+        const fileInput = document.getElementById('fileInput');
+        document.getElementById('attachBtn').addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type.startsWith('video/')) {
+                alert("현재 동영상 전송은 지원되지 않습니다. 이미지 파일을 선택해 주세요!");
+                fileInput.value = '';
+                return;
+            }
+
+            if (file.type.startsWith('image/')) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    selectedFileBase64 = event.target.result;
+                    document.getElementById('attachBtn').style.color = 'var(--accent-blue)';
+                    sendBtn.disabled = false;
+                    alert("사진이 준비되었습니다! 메시지를 입력하고 전송하세요.");
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+            sendBtn.disabled = textarea.value.trim() === '' && !selectedFile;
+        });
+    </script>
+</body>
+
+</html>
