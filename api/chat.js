@@ -1,4 +1,4 @@
-// api/chat.js (이걸 복사해서 붙여넣으세요!)
+// api/chat.js 에는 이것만 넣으세요!
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
   const MASTER_KEY = process.env.MINGO_MASTER_KEY;
@@ -17,4 +17,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to connect.', details: '[V6 Fixed] ' + error.message });
   }
 }
-
