@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -719,6 +719,10 @@
             const statusEl = thinkingRow.querySelector('#modelStatus');
 
             try {
+                if (window.location.protocol === 'file:') {
+                    throw new Error("Local file access detected. AI features require a server environment (Vercel). Please use the Vercel URL.");
+                }
+
                 statusEl.textContent = `⚡ 밍고 엔진 연결 중...`;
 
                 const response = await fetch('/api/chat', {
@@ -778,7 +782,11 @@
             } catch (error) {
                 console.error(error);
                 if (thinkingRow.parentNode) thinkingRow.remove();
-                addMessage("❌ **네트워크 오류**가 발생했습니다. 잠시 후 다시 시도해 주세요.", false);
+                if (window.location.protocol === 'file:') {
+                    addMessage("❌ **로컬 실행 제한**\n\n내 컴퓨터에서 직접 파일을 열면(`file://`) AI 기능을 사용할 수 없습니다. **Vercel 주소**로 접속해 주세요!", false);
+                } else {
+                    addMessage("❌ **네트워크 오류**가 발생했습니다. 잠시 후 다시 시도해 주세요.", false);
+                }
             }
             sendBtn.disabled = false;
         }
