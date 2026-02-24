@@ -18,8 +18,8 @@ export default async function handler(req, res) {
   try {
     const { contents, modelId } = req.body;
 
-    // 3. 구글 제미나이 API 호출
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId || 'gemini-1.5-flash'}:generateContent?key=${MASTER_KEY}`, {
+    // 3. 구글 제미나이 API 호출 (v1 안정화 버전 사용)
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelId || 'gemini-1.5-flash'}:generateContent?key=${MASTER_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents })
@@ -34,6 +34,6 @@ export default async function handler(req, res) {
     return res.status(200).json(data);
   } catch (error) {
     console.error('API Proxy Error:', error);
-    return res.status(500).json({ error: 'Failed to connect to AI engine.', details: error.message });
+    return res.status(500).json({ error: 'Failed to connect to AI engine.', details: '[V3 Server] ' + error.message });
   }
 }
