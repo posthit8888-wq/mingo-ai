@@ -675,9 +675,10 @@
             }
 
             if (drawMatch && drawMatch[1]) {
-                // V6.4.1: Enhanced prompt cleaning
-                // Remove leading/trailing parentheses or brackets that Gemini often includes
-                let promptRaw = drawMatch[1].trim().replace(/^[\(\{\[]+/, '').replace(/[\)\}\]]+$/, '');
+                // V6.4.2: Support full-width parentheses & robust cleaning
+                let promptRaw = drawMatch[1].trim()
+                    .replace(/^[（(\[{\s]+/, '')
+                    .replace(/[）)\]}\s]+$/, '');
                 const prompt = encodeURIComponent(promptRaw);
 
                 const imgContainer = document.createElement('div');
@@ -720,9 +721,38 @@
                         } else {
                             const loader = imgContainer.querySelector('.img-loader');
                             if (loader) {
-                                loader.innerHTML = '<span style="color:#ff4d4d; font-size:0.8rem;">❌ 이미지를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.</span>';
+                                const imgUrl = `https://image.pollinations.ai/prompt/${prompt}?nologo=true&width=1024&height=1024`;
+                                loader.innerHTML = `
+                                    <div style="text-align:center; padding:20px;">
+                                        <p style="color:#ff4d4d; font-size:0.85rem; margin-bottom:12px;">❌ 이미지를 가져오지 못했습니다.</p>
+                                        <div style="display:flex; gap:10px; justify-content:center;">
+                                            <button onclick="this.parentElement.parentElement.parentElement.innerHTML='<span class=\'loading-dots\'><span></span><span></span><span></span></span>'; setTimeout(() => { window.loadImageProxy('${prompt}', this.closest('.img-loader-parent')); }, 100);" 
+                                                    style="background:#444; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.75rem;">재시도</button>
+                                            <a href="${imgUrl}" target="_blank" style="background:var(--accent-blue); color:white; text-decoration:none; padding:6px 12px; border-radius:4px; font-size:0.75rem;">새 창에서 보기</a>
+                                        </div>
+                                    </div>
+                                `;
+                                loader.className = 'img-loader-parent'; // Add class for proxy to find
                             }
                         }
+                    };
+                };
+
+                // Proxy function for manual retry (global scope)
+                window.loadImageProxy = (encodedPrompt, container) => {
+                    const img = new Image();
+                    img.className = 'generated-img';
+                    img.style.display = 'none';
+                    const seed = Math.floor(Math.random() * 1000000);
+                    img.src = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&width=1024&height=1024&seed=${seed}`;
+
+                    img.onload = () => {
+                        container.innerHTML = '';
+                        img.style.display = 'block';
+                        container.appendChild(img);
+                    };
+                    img.onerror = () => {
+                        container.innerHTML = '<span style="color:#ff4d4d; font-size:0.8rem;">❌ 다시 시도했지만 실패했습니다. 프롬프트를 바꿔보세요.</span>';
                     };
                 };
 
