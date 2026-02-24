@@ -719,7 +719,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        modelId: "gemini-1.5-flash-8b",
+                        modelId: "gemini-1.5-flash",
                         contents: [
                             {
                                 role: "user",
@@ -768,7 +768,7 @@
                     } catch (e) {
                         errorMsg = "데이터 분석 중 오류가 발생했습니다.";
                     }
-                    addMessage(`❌ **연결 오류 [V4]**\n\n${errorMsg}`, false);
+                    addMessage(`❌ **연결 오류 [V5]**\n\n${errorMsg}`, false);
                 }
             } catch (error) {
                 console.error(error);
