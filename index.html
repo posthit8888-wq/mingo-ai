@@ -375,121 +375,121 @@
 
     <!-- API Overlay Removed -->
 
-    /* API Styles Removed */
-    .login-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #0f0f0f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    }
+    <style>
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0f0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
 
-    .login-card {
-    background: #1a1a1a;
-    padding: 48px;
-    border-radius: 24px;
-    border: 1px solid #333;
-    text-align: center;
-    max-width: 440px;
-    width: 90%;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
-    }
+        .login-card {
+            background: #1a1a1a;
+            padding: 48px;
+            border-radius: 24px;
+            border: 1px solid #333;
+            text-align: center;
+            max-width: 440px;
+            width: 90%;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+        }
 
-    .login-card h2 {
-    font-size: 2rem;
-    margin-bottom: 24px;
-    background: linear-gradient(90deg, #fff, #888);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    }
+        .login-card h2 {
+            font-size: 2rem;
+            margin-bottom: 24px;
+            background: linear-gradient(90deg, #fff, #888);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    .login-card p {
-    color: var(--text-secondary);
-    margin-bottom: 32px;
-    line-height: 1.6;
-    }
+        .login-card p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
 
-    /* --- Age Modal --- */
-    .age-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 11000;
-    backdrop-filter: blur(10px);
-    }
+        /* --- Age Modal --- */
+        .age-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 11000;
+            backdrop-filter: blur(10px);
+        }
 
-    .age-card {
-    background: #1e1e1e;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    max-width: 380px;
-    }
+        .age-card {
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 380px;
+        }
 
-    .age-btns {
-    display: flex;
-    gap: 12px;
-    margin-top: 24px;
-    }
+        .age-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
 
-    .btn-guest {
-    margin-top: 20px;
-    background: none;
-    border: 1px solid #444;
-    color: var(--text-secondary);
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: 0.2s;
-    width: 250px;
-    }
+        .btn-guest {
+            margin-top: 20px;
+            background: none;
+            border: 1px solid #444;
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            width: 250px;
+        }
 
-    .btn-guest:hover {
-    color: #fff;
-    border-color: #666;
-    background: #222;
-    }
+        .btn-guest:hover {
+            color: #fff;
+            border-color: #666;
+            background: #222;
+        }
 
-    /* --- User Profile in Sidebar --- */
-    .user-profile {
-    padding: 16px;
-    border-top: 1px solid #222;
-    display: none;
-    align-items: center;
-    gap: 12px;
-    margin-top: auto;
-    }
+        /* --- User Profile in Sidebar --- */
+        .user-profile {
+            padding: 16px;
+            border-top: 1px solid #222;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-top: auto;
+        }
 
-    .profile-img {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #333;
-    }
+        .profile-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #333;
+        }
 
-    .user-info span {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    }
+        .user-info span {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
 
-    .user-info small {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    }
+        .user-info small {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
     </style>
 
     <!-- Mingo - ChatGPT Style Implementation -->
@@ -559,26 +559,6 @@
             }
         }
 
-        function checkApiKey() {
-            const storageKey = isGuest ? 'MINGO_KEY_GUEST' : `MINGO_KEY_${currentUser.email}`;
-            API_KEY = localStorage.getItem(storageKey) || "";
-
-            if (!API_KEY) {
-                const titleEl = document.getElementById('apiTitle');
-                const msgEl = document.getElementById('apiMsg');
-
-                if (isGuest) {
-                    titleEl.textContent = "👤 손님 모드";
-                    msgEl.innerHTML = "비회원 이용을 위해 본인의 API 키를 입력해 주세요.<br>대화 기록은 저장되지 않습니다.";
-                } else {
-                    titleEl.textContent = "🧠 AI 두뇌 연결";
-                    msgEl.innerHTML = "로그인 완료! 이제 AI를 작동시키기 위해<br>API 키를 한 번만 등록해 주세요.";
-                }
-                overlay.style.display = 'flex';
-            } else {
-                showApp();
-            }
-        }
 
         function showApp() {
             loginOverlay.style.display = 'none';
@@ -601,30 +581,16 @@
             }
         }
 
-        function saveApiKey() {
-            const val = keyInput.value.trim();
-            if (val) {
-                const storageKey = isGuest ? 'MINGO_KEY_GUEST' : `MINGO_KEY_${currentUser.email}`;
-                localStorage.setItem(storageKey, val);
-                API_KEY = val;
-                showApp();
-            }
-        }
 
         function resetApiKey() {
             if (confirm("현재 계정의 설정을 초기화하고 완전히 로그아웃하시겠습니까? (이름과 프로필이 삭제됩니다)")) {
                 localStorage.removeItem('USER_INFO');
                 localStorage.removeItem('MINGO_USER_NAME');
+                localStorage.removeItem('MINGO_IS_GUEST'); // Added for safety
                 location.reload();
             }
         }
 
-        function changeApiKey() {
-            const storageKey = isGuest ? 'MINGO_KEY_GUEST' : `MINGO_KEY_${currentUser.email}`;
-            localStorage.removeItem(storageKey);
-            API_KEY = "";
-            checkApiKey();
-        }
 
         function newChat() {
             chatHistory = [];
