@@ -305,6 +305,12 @@
 
         <div class="user-profile" id="userProfile">
             <img src="" class="profile-img" id="profileImg">
+            <div class="sidebar-header">
+                <button id="newChatBtn" class="new-chat-btn">
+                    <span style="font-size: 1.2rem;">+</span> New Chat
+                </button>
+                <div style="font-size: 0.75rem; color: #555; margin-top: 5px; text-align: center;">Version: V6</div>
+            </div>
             <div class="user-info">
                 <span id="userName">사용자 이름</span>
                 <small id="userEmail">user@example.com</small>
@@ -719,7 +725,6 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        modelId: "gemini-1.5-flash",
                         contents: [
                             {
                                 role: "user",
@@ -768,7 +773,7 @@
                     } catch (e) {
                         errorMsg = "데이터 분석 중 오류가 발생했습니다.";
                     }
-                    addMessage(`❌ **연결 오류 [V5]**\n\n${errorMsg}`, false);
+                    addMessage(`❌ **연결 오류 [V6]**\n\n${errorMsg}`, false);
                 }
             } catch (error) {
                 console.error(error);
