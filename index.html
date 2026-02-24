@@ -751,7 +751,17 @@
                     chatHistory.push({ role: 'user', content: currentText });
                     chatHistory.push({ role: 'assistant', content: responseText });
                 } else {
-                    const errorMsg = data.error || "AI 엔진과의 연결이 원활하지 않습니다.";
+                    // 구글 API는 에러 정보를 객체로 반환하는 경우가 많습니다.
+                    let errorMsg = "AI 엔진과의 연결이 원활하지 않습니다.";
+                    if (data.error) {
+                        if (typeof data.error === 'string') {
+                            errorMsg = data.error;
+                        } else if (data.error.message) {
+                            errorMsg = data.error.message;
+                        } else {
+                            errorMsg = JSON.stringify(data.error);
+                        }
+                    }
                     addMessage(`❌ **연결 오류**\n\n${errorMsg}`, false);
                 }
             } catch (error) {
