@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const { contents, modelId } = req.body;
 
     // 3. 구글 제미나이 API 호출 (v1 안정화 버전 사용)
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelId || 'gemini-1.5-flash'}:generateContent?key=${MASTER_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelId || 'gemini-1.5-flash-8b'}:generateContent?key=${MASTER_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents })
